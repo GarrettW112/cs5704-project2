@@ -1,6 +1,9 @@
 from agents.extraction_agent import ReceiptExtractionAgent
 from agents.normalization_agent import ItemNormalizationAgent
 from agents.classification_agent import GroceryClassificationAgent
+from agents.expiration_agent import ExpirationEstimationAgent
+
+from services.expiration_service import ExpirationService
 
 
 class ReceiptPipeline:
@@ -8,28 +11,41 @@ class ReceiptPipeline:
         self.extractor = ReceiptExtractionAgent()
         self.normalizer = ItemNormalizationAgent()
         self.classifier = GroceryClassificationAgent()
+        self.expiration_agent = ExpirationEstimationAgent()
 
     def run(self, image_path: str):
-        extraction = self.extractor.run(image_path)
+        # 1️⃣ Extract
+        receipt = self.extractor.run(image_path)
 
+        # 2️⃣ Normalize
         normalized = self.normalizer.run(
-            extraction["merchant"],
-            extraction["items"]
+            receipt["merchant"],
+            receipt["items"]
+        )
+        norm_lookup = {n["raw_name"]: n for n in normalized}
+
+        for item in receipt["items"]:
+            item["normalized_name"] = norm_lookup.get(
+                item["raw_name"], {}
+            ).get("normalized_name", item["raw_name"])
+
+        # 3️⃣ Classify
+        classified = self.classifier.run(receipt["items"])
+        class_lookup = {c["normalized_name"]: c for c in classified}
+
+        for item in receipt["items"]:
+            item["category"] = class_lookup.get(
+                item["normalized_name"], {}
+            ).get("category", "Other")
+
+        # 4️⃣ Expiration estimation (LLM)
+        expiration_estimates = self.expiration_agent.run(receipt["items"])
+
+        # 5️⃣ Expiration calculation (Service layer)
+        receipt["items"] = ExpirationService.apply_expiration(
+            receipt["items"],
+            expiration_estimates,
+            receipt.get("date")
         )
 
-        norm_lookup = {i["raw_name"]: i for i in normalized}
-
-        for item in extraction["items"]:
-            raw = item["raw_name"]
-            item["normalized_name"] = norm_lookup.get(raw, {}).get("normalized_name", raw)
-
-        classified = self.classifier.run(extraction["items"])
-
-        class_lookup = {i["normalized_name"]: i for i in classified}
-
-        for item in extraction["items"]:
-            norm = item["normalized_name"]
-            item["category"] = class_lookup.get(norm, {}).get("category", "Other")
-            item["subcategory"] = class_lookup.get(norm, {}).get("subcategory", "")
-
-        return extraction
+        return receipt
