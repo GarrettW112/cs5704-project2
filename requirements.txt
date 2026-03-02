@@ -1,4 +1,4 @@
 google-generativeai
 python-dotenv
 pillow
-"fastapi[standard]"
+fastapi[standard]
