@@ -29,7 +29,7 @@ async def process_receipt(file: UploadFile = File(...)):
     return result
 
 
-from ScanAndSave.api.endpoints import users
+from ScanAndSave.api.endpoints import users, auth
 
 app.include_router(
     users.router,
@@ -37,4 +37,20 @@ app.include_router(
     tags=["users"]
 )
 
+app.include_router(
+    auth.router,
+    prefix="/auth",
+    tags=["auth"]
+)
+
 Base.metadata.create_all(bind=engine)
+
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # For dev only; narrow this down for your VT project later
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)

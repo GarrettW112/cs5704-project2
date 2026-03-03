@@ -19,7 +19,7 @@ def get_database():
 
 
 # 1. Define the OAuth2 scheme
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 # 2. Define a reusable Exception
 credentials_exception = HTTPException(
