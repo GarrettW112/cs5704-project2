@@ -1,5 +1,5 @@
 from datetime import timedelta
-from utils.date_utils import parse_date, to_iso_string
+from ScanAndSave.utils.date_utils import parse_date, to_iso_string
 
 
 class ExpirationService:

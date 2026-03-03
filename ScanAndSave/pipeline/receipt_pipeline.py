@@ -1,9 +1,9 @@
-from agents.extraction_agent import ReceiptExtractionAgent
-from agents.normalization_agent import ItemNormalizationAgent
-from agents.classification_agent import GroceryClassificationAgent
-from agents.expiration_agent import ExpirationEstimationAgent
+from ScanAndSave.agents.extraction_agent import ReceiptExtractionAgent
+from ScanAndSave.agents.normalization_agent import ItemNormalizationAgent
+from ScanAndSave.agents.classification_agent import GroceryClassificationAgent
+from ScanAndSave.agents.expiration_agent import ExpirationEstimationAgent
 
-from services.expiration_service import ExpirationService
+from ScanAndSave.services.expiration_service import ExpirationService
 
 
 class ReceiptPipeline:

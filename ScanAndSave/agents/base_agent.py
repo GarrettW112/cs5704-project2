@@ -1,5 +1,5 @@
 import google.generativeai as genai
-from config import MODEL_NAME
+from ScanAndSave.config import MODEL_NAME
 
 
 class BaseAgent:

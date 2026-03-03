@@ -2,3 +2,8 @@ google-generativeai
 python-dotenv
 pillow
 fastapi[standard]
+pymysql
+sqlalchemy
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt==4.3.0

@@ -3,13 +3,16 @@ import tempfile
 import os
 from pathlib import Path
 from fastapi import FastAPI, UploadFile, File
-from pipeline.receipt_pipeline import ReceiptPipeline # Adjust path
+from ScanAndSave.pipeline.receipt_pipeline import ReceiptPipeline # Adjust path
+from ScanAndSave.database.session import engine, Base
+from ScanAndSave.models import user # Import all models to register them
 
 app = FastAPI()
 pipeline = ReceiptPipeline()
 
 @app.post("/process-receipt/")
 async def process_receipt(file: UploadFile = File(...)):
+
     # Create the temp file, but don't use the 'with' block context for the run
     temp = tempfile.NamedTemporaryFile(delete=False, suffix=Path(file.filename).suffix)
     try:
@@ -24,3 +27,14 @@ async def process_receipt(file: UploadFile = File(...)):
             os.remove(temp.name)
             
     return result
+
+
+from ScanAndSave.api.endpoints import users
+
+app.include_router(
+    users.router,
+    prefix="/users",
+    tags=["users"]
+)
+
+Base.metadata.create_all(bind=engine)
