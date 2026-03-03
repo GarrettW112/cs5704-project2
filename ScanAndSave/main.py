@@ -26,6 +26,9 @@ async def process_receipt(file: UploadFile = File(...)):
         if os.path.exists(temp.name):
             os.remove(temp.name)
             
+
+    
+    # parse result and store receipt in db
     return result
 
 
