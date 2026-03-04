@@ -6,27 +6,76 @@ from ScanAndSave.crud import crud_receipt
 from ScanAndSave.models.receipt import Receipt
 from ScanAndSave.models.user import User
 from ScanAndSave.pipeline.receipt_pipeline import ReceiptPipeline # Adjust path
+import tempfile
+import shutil
+import os
+from datetime import datetime
+from decimal import Decimal
+from pathlib import Path
+
 router = APIRouter()
 pipeline = ReceiptPipeline()
 
-@router.post("/process-receipt/")
-async def process_receipt(file: UploadFile = File(...), db: Session = Depends(get_database)):
+@router.post("/process-receipt/", response_model=ReceiptResponse)
+async def process_receipt(
+    file: UploadFile = File(...), 
+    db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user)
+):
 
-    # Create the temp file, but don't use the 'with' block context for the run
-    temp = tempfile.NamedTemporaryFile(delete=False, suffix=Path(file.filename).suffix)
+    # Create temp file path
+    suffix = Path(file.filename).suffix
+    temp_path = None
+
     try:
-        shutil.copyfileobj(file.file, temp)
-        temp.close()  # <--- CLOSE IT HERE so the Agent can open it
-        
-        # Now the Agent has permission to read it
-        result = pipeline.run(temp.name)
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp:
+            shutil.copyfileobj(file.file, temp)
+            temp_path = temp.name
+
+        # IMPORTANT: close the uploaded file
+        await file.close()
+
+        # Run pipeline AFTER file handles are closed
+        result = pipeline.run(temp_path)
+
     finally:
-        # Manually delete it since we used delete=False
-        if os.path.exists(temp.name):
-            os.remove(temp.name)
-            
-    # parse result and store receipt in db
-    return result
+        # Delete file safely
+        if temp_path and os.path.exists(temp_path):
+            try:
+                os.remove(temp_path)
+            except PermissionError:
+                print("Warning: temp file still locked, skipping delete")
+
+    if not result:
+        raise HTTPException(status_code=400, detail="Failed to process receipt")
+
+    # ---- Parse AI output ----
+    try:
+        store = result.get("merchant", "Unknown Store")
+        total = Decimal(str(result.get("total", 0)))
+
+        # Convert date string "09/21/20" → datetime.date
+        raw_date = result.get("date")
+        purchase_date = datetime.strptime(raw_date, "%m/%d/%y").date()
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error parsing AI output: {str(e)}")
+
+    # ---- Create Receipt Schema ----
+    receipt_data = ReceiptCreate(
+        store=store,
+        purchase_date=purchase_date,
+        total_amount=total
+    )
+
+    # ---- Save to DB ----
+    db_receipt = crud_receipt.create_receipt(
+        db=db,
+        receipt=receipt_data,
+        user_id=current_user.id
+    )
+
+    return db_receipt
 
 @router.post("/add-receipt/")
 async def add_receipt(receipt: ReceiptCreate, db: Session = Depends(get_database), current_user: User = Depends(get_current_user)):
