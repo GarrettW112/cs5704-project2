@@ -10,6 +10,11 @@ class ReceiptBase(BaseModel):
 class ReceiptCreate(ReceiptBase):
     pass
 
+class ReceiptUpdate(BaseModel):
+    store: str | None = None
+    purchase_date: date | None = None
+    total_amount: Decimal | None = None
+
 class ReceiptResponse(ReceiptBase):
     receipt_id: int
     user_id: int

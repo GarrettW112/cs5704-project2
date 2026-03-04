@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 from sqlalchemy.orm import Session
 from ScanAndSave.api.endpoints.deps import get_database
-from ScanAndSave.schemas.receipt import ReceiptCreate, ReceiptResponse
+from ScanAndSave.schemas.receipt import ReceiptCreate, ReceiptUpdate, ReceiptResponse
 from ScanAndSave.crud import crud_receipt
 from ScanAndSave.models.receipt import Receipt
 from ScanAndSave.pipeline.receipt_pipeline import ReceiptPipeline # Adjust path
@@ -41,3 +41,68 @@ async def add_receipt(receipt: ReceiptCreate, db: Session = Depends(get_database
     )
 
     return db_receipt
+
+# Get all receipts by user ID
+@router.get("/", response_model=list[ReceiptResponse])
+def get_receipts(db: Session = Depends(get_database)):
+
+    # TEMP: hardcode a user ID for testing
+    user_id = 1
+
+    receipts = crud_receipt.get_user_receipts(
+        db=db, 
+        user_id=user_id)
+
+    return receipts
+
+# Get a receipt by receipt ID
+@router.get("/{receipt_id}", response_model=ReceiptResponse)
+def get_receipt(receipt_id: int, db: Session = Depends(get_database)):
+    
+    # TEMP: hardcode a user ID for testing
+    user_id = 1
+
+    receipt = crud_receipt.get_receipt(
+        db=db, 
+        receipt_id=receipt_id)
+    
+    if not receipt or receipt.user_id != user_id:
+        raise HTTPException(status_code=404, detail="Receipt not found")
+    
+    return receipt
+
+# Update receipt
+@router.put("/{receipt_id}", response_model=ReceiptResponse)
+def update_receipt(receipt_id: int, update: ReceiptUpdate, db: Session = Depends(get_database)):
+    
+    # TEMP: hardcode a user ID for testing
+    user_id = 1
+    
+    db_receipt = crud_receipt.update_receipt(
+        db=db,
+        receipt_id=receipt_id,
+        user_id=user_id,
+        new_data=update.dict(exclude_unset=True)
+    )
+    if not db_receipt:
+        raise HTTPException(status_code=404, detail="Receipt not found")
+    
+    return db_receipt
+
+
+# Delete receipt
+@router.delete("/{receipt_id}", response_model=ReceiptResponse)
+def delete_receipt(receipt_id: int, db: Session = Depends(get_database)):
+    
+    # TEMP: hardcode a user ID for testing
+    user_id = 1
+
+    receipt = crud_receipt.delete_receipt(
+        db=db, 
+        receipt_id=receipt_id, 
+        user_id=user_id)
+    
+    if not receipt:
+        raise HTTPException(status_code=404, detail="Receipt not found")
+    
+    return receipt
