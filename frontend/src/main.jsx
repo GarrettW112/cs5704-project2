@@ -14,7 +14,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/upload",
-    element: <div className="p-10">Upload your receipt here!</div>,
+    element: <div className="p-10">Upload your receipt here!</div>, // page component goes here
   },
 ]);
 
