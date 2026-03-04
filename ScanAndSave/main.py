@@ -8,7 +8,7 @@ from ScanAndSave.models import user # Import all models to register them
 
 app = FastAPI()
 
-from ScanAndSave.api.endpoints import users, auth, receipts
+from ScanAndSave.api.endpoints import users, auth, receipts, items
 
 app.include_router(
     users.router,
@@ -26,6 +26,12 @@ app.include_router(
     receipts.router,
     prefix="/receipts",
     tags=["receipts"]
+)
+
+app.include_router(
+    items.router,
+    prefix="/items",
+    tags=["items"]
 )
 
 Base.metadata.create_all(bind=engine)
