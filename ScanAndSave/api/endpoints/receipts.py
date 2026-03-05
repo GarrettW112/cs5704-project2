@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 from sqlalchemy.orm import Session
 from ScanAndSave.api.endpoints.deps import get_database, get_current_user
 from ScanAndSave.schemas.receipt import ReceiptCreate, ReceiptUpdate, ReceiptResponse
-from ScanAndSave.crud import crud_receipt
+from ScanAndSave.schemas.item import ItemCreate
+from ScanAndSave.crud import crud_receipt, crud_item
 from ScanAndSave.models.receipt import Receipt
 from ScanAndSave.models.user import User
 from ScanAndSave.pipeline.receipt_pipeline import ReceiptPipeline # Adjust path
@@ -74,6 +75,37 @@ async def process_receipt(
         receipt=receipt_data,
         user_id=current_user.id
     )
+
+    # ---- Extract and Save Items ----
+    items_data = result.get("items", [])
+
+    for item in items_data:
+        expiration_str = item.get("estimated_expiration_date")
+        expiration_date = None
+
+        if expiration_str:
+            expiration_date = datetime.strptime(
+                expiration_str,
+                "%Y-%m-%d"
+            ).date()
+        try:
+            item_create = ItemCreate(
+                receipt_id=db_receipt.receipt_id,
+                raw_name=item.get("raw_name"),
+                normalized_name=item.get("normalized_name"),
+                category=item.get("category"),
+                price=Decimal(str(item.get("price", 0))),
+                quantity=Decimal(str(item.get("quantity", 1))),
+                estimated_expiration_date=expiration_date
+            )
+
+            crud_item.create_item(
+                db=db,
+                item=item_create
+            )
+
+        except Exception as e:
+            print(f"Failed to save item {item.get('raw_name')}: {e}")
 
     return db_receipt
 
