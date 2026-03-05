@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ScanAndSave.schemas.item import ItemResponse, ItemCreate, ItemUpdate
-from ScanAndSave.crud import crud_item
+from ScanAndSave.crud import crud_item, crud_inventory
 from ScanAndSave.api.endpoints.deps import get_database, get_current_user
 from ScanAndSave.models.user import User
 
@@ -38,6 +38,13 @@ def create_new_item(item_in: ItemCreate, db: Session = Depends(get_database), cu
     db_item = crud_item.create_item(
         db=db,
         item=item_in,
+    )
+
+    crud_inventory.create_inventory_item(
+        db=db,
+        item_id=db_item.id,
+        user_id=current_user.id,
+        item=item_in
     )
 
     return db_item
