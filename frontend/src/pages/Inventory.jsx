@@ -43,6 +43,7 @@ function Inventory() {
   );
 
   async function decrement(id) {
+  try {
     const res = await fetch(`${API_BASE}/inventory/${id}/decrement`, {
       method: "PATCH",
       headers: {
@@ -54,10 +55,20 @@ function Inventory() {
 
     if (res.ok) {
       const updated = await res.json();
-      setItems((prev) => prev.map((x) => (x.id === id ? updated : x)));
-    }
-  }
 
+      // Check if quantity has hit 0
+      if (Number(updated.quantity) <= 0) {
+        // Option A: Call your existing removeItem function to delete from DB
+        await removeItem(id);
+      } else {
+        // Otherwise, just update the list normally
+        setItems((prev) => prev.map((x) => (x.id === id ? updated : x)));
+      }
+    }
+  } catch (error) {
+    console.error("Decrement failed:", error);
+  }
+}
   async function removeItem(id) {
     const res = await fetch(`${API_BASE}/inventory/${id}`, {
       method: "DELETE",

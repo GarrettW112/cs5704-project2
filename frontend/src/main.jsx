@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./index.css";
 import Register from "./pages/Register";
+import ReceiptDetail from "./pages/ReceiptDetail";
 
 const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
@@ -18,6 +19,7 @@ const router = createBrowserRouter([
       { path: "/", element: <Home /> },
       { path: "/past-uploads", element: <PastUploads /> },
       { path: "/inventory", element: <Inventory /> },
+      { path: "/past-uploads/:id", element: <ReceiptDetail /> }
     ],
   },
 ]);

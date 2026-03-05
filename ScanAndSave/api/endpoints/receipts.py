@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from ScanAndSave.api.endpoints.deps import get_database, get_current_user
 from ScanAndSave.schemas.receipt import ReceiptCreate, ReceiptUpdate, ReceiptResponse, ReceiptWithItemsResponse
 from ScanAndSave.schemas.item import ItemCreate
-from ScanAndSave.crud import crud_receipt, crud_item
+from ScanAndSave.crud import crud_receipt, crud_item, crud_inventory
 from ScanAndSave.models.receipt import Receipt
 from ScanAndSave.models.user import User
 from ScanAndSave.pipeline.receipt_pipeline import ReceiptPipeline # Adjust path
@@ -99,8 +99,15 @@ async def process_receipt(
                 estimated_expiration_date=expiration_date
             )
 
-            crud_item.create_item(
+            db_item = crud_item.create_item(
                 db=db,
+                item=item_create
+            )
+
+            crud_inventory.create_inventory_item(
+                db=db,
+                item_id=db_item.id,
+                user_id=current_user.id,
                 item=item_create
             )
 
