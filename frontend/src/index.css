@@ -183,3 +183,52 @@ body {
     text-align: center;
   }
 }
+
+.past-uploads h1 {
+  font-family: "DM Serif Display", serif;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  margin: 0;
+}
+
+.past-uploads-subtext {
+  margin: 8px 0 16px;
+  color: var(--muted);
+}
+
+.receipt-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.receipt-store {
+  font-weight: 700;
+}
+
+.receipt-date {
+  color: var(--muted);
+}
+
+.receipt-empty {
+  color: var(--muted);
+}
+
+@media (max-width: 900px) {
+  .receipt-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
