@@ -34,19 +34,19 @@ def read_item(item_id: int, db: Session = Depends(get_database), current_user: U
     return item
 
 @router.post("/", response_model=ItemResponse)
-def create_new_item(item_in: ItemCreate, db: Session = Depends(get_database), current_user: User = Depends(get_current_user)):
+def create_new_item(
+    item_in: ItemCreate,
+    db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
+):
+    receipt = crud_receipt.get_receipt(db=db, receipt_id=item_in.receipt_id)
+    if not receipt or receipt.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Receipt not found")
+
     db_item = crud_item.create_item(
         db=db,
         item=item_in,
     )
-
-    crud_inventory.create_inventory_item(
-        db=db,
-        item_id=db_item.id,
-        user_id=current_user.id,
-        item=item_in
-    )
-
     return db_item
 
 @router.put("/{item_id}", response_model=ItemResponse)
