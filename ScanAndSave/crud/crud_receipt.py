@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from ScanAndSave.models.receipt import Receipt
 from ScanAndSave.schemas.receipt import ReceiptCreate
 
@@ -19,9 +19,12 @@ def create_receipt(db: Session, receipt: ReceiptCreate, user_id: int):
 
 # Get a receipt by receipt ID
 def get_receipt(db: Session, receipt_id: int):
-    return db.query(Receipt).filter(
-        Receipt.receipt_id == receipt_id
-    ).first()
+    return (
+        db.query(Receipt)
+        .options(selectinload(Receipt.items))
+        .filter(Receipt.receipt_id == receipt_id)
+        .first()
+    )
 
 # Get all receipts by user ID
 def get_user_receipts(db: Session, user_id: int):

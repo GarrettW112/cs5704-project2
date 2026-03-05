@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 from sqlalchemy.orm import Session
 from ScanAndSave.api.endpoints.deps import get_database, get_current_user
-from ScanAndSave.schemas.receipt import ReceiptCreate, ReceiptUpdate, ReceiptResponse
+from ScanAndSave.schemas.receipt import ReceiptCreate, ReceiptUpdate, ReceiptResponse, ReceiptWithItemsResponse
 from ScanAndSave.schemas.item import ItemCreate
 from ScanAndSave.crud import crud_receipt, crud_item
 from ScanAndSave.models.receipt import Receipt
@@ -132,7 +132,7 @@ def get_receipts(db: Session = Depends(get_database), current_user: User = Depen
     return receipts
 
 # Get a receipt by receipt ID
-@router.get("/{receipt_id}", response_model=ReceiptResponse)
+@router.get("/{receipt_id}", response_model=ReceiptWithItemsResponse)
 def get_receipt(receipt_id: int, db: Session = Depends(get_database), current_user: User = Depends(get_current_user)):
 
     receipt = crud_receipt.get_receipt(

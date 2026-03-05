@@ -1,6 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import date
 from decimal import Decimal
+from ScanAndSave.schemas.item import ItemResponse
 
 class ReceiptBase(BaseModel):
     store: str
@@ -21,3 +22,6 @@ class ReceiptResponse(ReceiptBase):
 
     class Config:
         from_attributes = True
+
+class ReceiptWithItemsResponse(ReceiptResponse):
+    items: list[ItemResponse] = Field(default_factory=list)

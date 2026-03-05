@@ -1,11 +1,13 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Text, Numeric, Date, TIMESTAMP
 from sqlalchemy.sql import func
 from ScanAndSave.database.session import Base
+from sqlalchemy.orm import relationship
 
 
 class Item(Base):
     __tablename__ = "items"
 
+    receipt = relationship("Receipt", back_populates="items")
     id = Column(Integer, primary_key=True, autoincrement=True)
     receipt_id = Column(Integer, ForeignKey("receipts.receipt_id", ondelete="CASCADE"))
 
