@@ -1,6 +1,3 @@
-import shutil
-import tempfile
-import os
 from pathlib import Path
 from fastapi import FastAPI, UploadFile, File
 from ScanAndSave.database.session import engine, Base
@@ -46,7 +43,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # For dev only; narrow this down for your VT project later
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

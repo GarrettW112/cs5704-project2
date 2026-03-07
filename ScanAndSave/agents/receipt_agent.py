@@ -19,7 +19,7 @@ genai.configure(api_key=api_key)
 
 
 # ==========================================================
-# 🥇 Agent 1: Receipt Extraction Agent
+# Agent 1: Receipt Extraction Agent
 # ==========================================================
 class ReceiptExtractionAgent:
     def __init__(self):
@@ -77,7 +77,7 @@ class ReceiptExtractionAgent:
 
 
 # ==========================================================
-# 🥈 Agent 2: Normalization Agent
+# Agent 2: Normalization Agent
 # ==========================================================
 class ItemNormalizationAgent:
     def __init__(self):
@@ -128,7 +128,7 @@ class ItemNormalizationAgent:
 
 
 # ==========================================================
-# 🔄 Pipeline Orchestrator
+# Pipeline Orchestrator
 # ==========================================================
 class ReceiptPipeline:
     def __init__(self):

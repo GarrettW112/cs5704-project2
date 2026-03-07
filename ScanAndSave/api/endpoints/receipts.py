@@ -33,10 +33,10 @@ async def process_receipt(
             shutil.copyfileobj(file.file, temp)
             temp_path = temp.name
 
-        # IMPORTANT: close the uploaded file
+        # close the uploaded file
         await file.close()
 
-        # Run pipeline AFTER file handles are closed
+        # Run pipeline after file handles are closed
         result = pipeline.run(temp_path)
 
     finally:
@@ -55,7 +55,7 @@ async def process_receipt(
         store = result.get("merchant", "Unknown Store")
         total = Decimal(str(result.get("total", 0)))
 
-        # Convert date string "09/21/20" → datetime.date
+        # Convert date string to datetime.date
         raw_date = result.get("date")
         purchase_date = datetime.strptime(raw_date, "%m/%d/%y").date()
 
@@ -119,7 +119,6 @@ async def process_receipt(
 @router.post("/add-receipt/")
 async def add_receipt(receipt: ReceiptCreate, db: Session = Depends(get_database), current_user: User = Depends(get_current_user)):
 
-    # Use your CRUD layer to save the receipt
     db_receipt = crud_receipt.create_receipt(
         db=db,
         receipt=receipt,

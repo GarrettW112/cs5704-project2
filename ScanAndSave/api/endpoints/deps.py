@@ -3,11 +3,9 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
 
-
-# Import your own project files
 from ScanAndSave.database.session import SessionLocal
-from ScanAndSave.models.user import User  # Adjust path to your User model
-from ScanAndSave.security import SECRET_KEY, ALGORITHM # If stored in config
+from ScanAndSave.models.user import User  
+from ScanAndSave.security import SECRET_KEY, ALGORITHM 
 
 
 def get_database():

@@ -14,10 +14,10 @@ class ReceiptPipeline:
         self.expiration_agent = ExpirationEstimationAgent()
 
     def run(self, image_path: str):
-        # 1️⃣ Extract
+        # Extract
         receipt = self.extractor.run(image_path)
 
-        # 2️⃣ Normalize
+        # Normalize
         normalized = self.normalizer.run(
             receipt["merchant"],
             receipt["items"]
@@ -29,7 +29,7 @@ class ReceiptPipeline:
                 item["raw_name"], {}
             ).get("normalized_name", item["raw_name"])
 
-        # 3️⃣ Classify
+        # Classify
         classified = self.classifier.run(receipt["items"])
         class_lookup = {c["normalized_name"]: c for c in classified}
 
@@ -38,10 +38,10 @@ class ReceiptPipeline:
                 item["normalized_name"], {}
             ).get("category", "Other")
 
-        # 4️⃣ Expiration estimation (LLM)
+        # Expiration estimation (LLM)
         expiration_estimates = self.expiration_agent.run(receipt["items"])
 
-        # 5️⃣ Expiration calculation (Service layer)
+        # Expiration calculation (Service layer)
         receipt["items"] = ExpirationService.apply_expiration(
             receipt["items"],
             expiration_estimates,

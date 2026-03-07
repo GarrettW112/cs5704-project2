@@ -11,7 +11,7 @@ def create_user(db: Session, user_in: UserCreate):
     db_user = User(
         username=user_in.username,
         email=user_in.email,
-        hashed_password=hashed_pw # Store the GIBBERISH, not the password
+        hashed_password=hashed_pw # Store the hash
     )
     
     # 3. Save to MySQL
