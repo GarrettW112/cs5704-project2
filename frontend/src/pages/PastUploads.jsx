@@ -2,7 +2,6 @@ import PageLayout from "../components/PageLayout";
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-// 1. Updated Row Component with Delete Button
 function ReceiptRow({ id, store, date, onDelete }) {
   const handleDeleteClick = (e) => {
     // Prevent the Link from firing when clicking the delete button

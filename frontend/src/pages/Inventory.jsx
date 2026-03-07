@@ -58,7 +58,7 @@ function Inventory() {
 
       // Check if quantity has hit 0
       if (Number(updated.quantity) <= 0) {
-        // Option A: Call your existing removeItem function to delete from DB
+        // Call existing removeItem function to delete from DB
         await removeItem(id);
       } else {
         // Otherwise, just update the list normally

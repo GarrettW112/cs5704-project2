@@ -87,7 +87,6 @@ function ReceiptDetail() {
             });
 
             if (!response.ok) {
-                // This will help you see EXACTLY which field failed in the console
                 const errorDetail = await response.json();
                 console.error("Validation Error Details:", errorDetail);
                 throw new Error('Save failed');
