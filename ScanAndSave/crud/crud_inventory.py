@@ -69,3 +69,10 @@ def delete_inventory(db: Session, inventory_id: int, user_id: int):
         db.commit()
 
     return inventory
+
+def get_inventory_by_item(db: Session, item_id: int, user_id: int):
+    return (
+        db.query(Inventory)
+        .filter(Inventory.item_id == item_id, Inventory.user_id == user_id)
+        .first()
+    )

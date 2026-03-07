@@ -99,15 +99,8 @@ async def process_receipt(
                 estimated_expiration_date=expiration_date
             )
 
-            db_item = crud_item.create_item(
+            crud_item.create_item(
                 db=db,
-                item=item_create
-            )
-
-            crud_inventory.create_inventory_item(
-                db=db,
-                item_id=db_item.id,
-                user_id=current_user.id,
                 item=item_create
             )
 
@@ -115,6 +108,44 @@ async def process_receipt(
             print(f"Failed to save item {item.get('raw_name')}: {e}")
 
     return db_receipt
+
+@router.post("/{receipt_id}/save-to-inventory")
+def save_receipt_to_inventory(
+    receipt_id: int,
+    db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
+):
+    receipt = crud_receipt.get_receipt(db=db, receipt_id=receipt_id)
+
+    if not receipt or receipt.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Receipt not found")
+
+    created = 0
+    skipped = 0
+
+    for item in receipt.items:
+        existing = crud_inventory.get_inventory_by_item(
+            db=db,
+            item_id=item.id,
+            user_id=current_user.id,
+        )
+        if existing:
+            skipped += 1
+            continue
+
+        crud_inventory.create_inventory_item(
+            db=db,
+            item_id=item.id,
+            user_id=current_user.id,
+            item=item,  # has normalized_name/raw_name/category/quantity/expiration
+        )
+        created += 1
+
+    return {
+        "receipt_id": receipt_id,
+        "inventory_items_created": created,
+        "inventory_items_skipped": skipped,
+    }
 
 @router.post("/add-receipt/")
 async def add_receipt(receipt: ReceiptCreate, db: Session = Depends(get_database), current_user: User = Depends(get_current_user)):
