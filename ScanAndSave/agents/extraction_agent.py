@@ -1,6 +1,7 @@
 import json
 from PIL import Image
 from .base_agent import BaseAgent
+from ScanAndSave.config import VISION_MODEL_NAME
 
 
 class ReceiptExtractionAgent(BaseAgent):
@@ -9,7 +10,7 @@ class ReceiptExtractionAgent(BaseAgent):
             "type": "object",
             "properties": {
                 "merchant": {"type": "string"},
-                "date": {"type": "string"},
+                "date": {"type": ["string", "null"]},
                 "items": {
                     "type": "array",
                     "items": {
@@ -18,27 +19,31 @@ class ReceiptExtractionAgent(BaseAgent):
                             "raw_name": {"type": "string"},
                             "price": {"type": "number"}
                         },
-                        "required": ["raw_name", "price"]
+                        "required": ["raw_name", "price"],
+                        "additionalProperties": False
                     }
                 },
-                "subtotal": {"type": "number"},
-                "tax": {"type": "number"},
+                "subtotal": {"type": ["number", "null"]},
+                "tax": {"type": ["number", "null"]},
                 "total": {"type": "number"}
             },
-            "required": ["merchant", "items", "total"]
+            "required": ["merchant", "date", "items", "subtotal", "tax", "total"],
+            "additionalProperties": False
         }
 
-        super().__init__(schema)
+        super().__init__(schema, "ReceiptExtraction")
+
+        self.model = VISION_MODEL_NAME
 
     def run(self, image_path: str):
         image = Image.open(image_path)
 
         prompt = """
         Extract receipt data including merchant, date,
-        items (raw_name exactly as printed and numeric price),
-        subtotal, tax, and total.
+        items, subtotal, tax, and total. 
+        If a field like tax or date is completely missing, return null for it.
         Return JSON only.
         """
 
-        result = self.generate([prompt, image])
+        result = self.generate(prompt, image)
         return json.loads(result)

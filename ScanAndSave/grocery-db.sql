@@ -2,10 +2,10 @@
 --  SQL script to create tables in the grocery database
 -- ----------------------------------------------------
 
-DROP DATABASE IF EXISTS grocery-db;
+DROP DATABASE IF EXISTS grocery_db;
 
-CREATE DATABASE grocery-db
-USE grocery-db;
+CREATE DATABASE grocery_db;
+USE grocery_db;
 
 -- Owner of receipts and inventory
 CREATE TABLE user
